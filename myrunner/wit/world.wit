@@ -1,0 +1,10 @@
+package app:myapp@0.1.0;
+
+interface calculate {
+    eval-expression: func(expr: string) -> u32;
+}
+
+world calculator {
+    import docs:calculator/calculate@0.1.0;
+    export calculate;
+}
