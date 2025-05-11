@@ -38,7 +38,6 @@ WASMTIME dependency: https://github.com/afsalthaj/wasmtime
 ## Presentation:
 
 
-
 ![right fit](/Users/afsalthaj/projects/lambdaconf_2025/rib_image_unplugged.png)
 
 ## Rib - way of interacting with web assembly
@@ -46,7 +45,7 @@ WASMTIME dependency: https://github.com/afsalthaj/wasmtime
 ---
 
 
-## Why WASM ?
+## Why WebAssembly ?
 
 * Fast, portable, and secure by design
 
@@ -169,14 +168,12 @@ As of now dev release required to invoke functions in a component
 
 
 ---
-
 ## What we achieved?
-
-![filtered](/Users/afsalthaj/projects/ribbb/lambdaconf_2025/rib_image.jpeg)
+![right filtered 50%](/Users/afsalthaj/projects/ribbb/lambdaconf_2025/rib_image.jpeg)
 
 * Quick _**typesafe**_ interactions with WASM components
 * _**Method call syntax**_ to invoke functions
-* _**Autocomplete**_ all the way - function name, variants, enums and  function arguments
+* _**Autocomplete**_ all the way
 * **Inspect types** anytime
 * Distinguish components, functions etc properly
 * Descriptive _**compilation errors**_
@@ -188,8 +185,8 @@ As of now dev release required to invoke functions in a component
 It's easy to use, and syntax is intuitive 
 
 * Simply start `wasmtime repl`, create an instance and rely on auto completes
-* *And you know Rib if you know basic Rust syntax to a great extent*
-* Sticks on to _**wasm wave syntax**_
+* You know Rib if you know basic Rust syntax for most of it
+* Sticks on to _**wasm wave syntax**_ for wasm values
 
 ---
 
@@ -238,7 +235,7 @@ _**baz**_ and _**qux**_ are interfaces having function _**bar**_
 
 Is **Rib REPL** tied to `wasmtime`?
 
-No! `Rib REPL` is an embeddable REPL that you can integrate with any system/runtime clients.
+No! `Rib REPL` embeddable - that you integrate with any system/runtime clients.
 
 We will see an example of it outside wasmtime
 
@@ -266,28 +263,37 @@ _**Golem OSS**_
 ### Why?
 
 * I can write the application with an in-memory map
-* Can't get into the boring DB and persistence layer during my development
-* Can't deal with deploying http server or any methods to run the wasm forever
+* I can't get into the boring DB and persistence layer
+* I don't need to re-engineer what golem has done in running a component forever
 
 
 ---
 
-### Let's see how quick it is to switch
+## Let's see how quick it is!
 
 ---
+## Bootstrap an app with golem
 
-### golem CLI and Rib REPL
+```sh
+golem server run
+golem app new shopping-cart rust
+cd shopping-cart
+golem component new rust my:shopping-cart
+golem repl
 
+```
+---
+
+
+## Let's see this in action
 
 ---
 
 ### Golem CLI
 
-Golem CLI is integrated with the same Rib Repl
+Golem CLI is integrated with the same Rib REPL crate
 
 ```rust
-golem app build
-golem repl
 
 >>> let worker = instance("my_cart")
 >>> cart.add-item({product-id: "foo", name: "foo", price: 42, quantity: 42})
@@ -299,34 +305,36 @@ golem repl
 ```
 
 ---
-## Rib Syntax
 
-Mostly covered in https://learn.golem.cloud/rib, 
-covering `list comprehension`, `list reduction`,`if conditions`, `pattern match` and so on and so forth!
+## More on Rib Syntax
 
+---
+## Rib Syntax and Grammer
 
-Internally desugars to an `if-else`
+![right fit](/Users/afsalthaj/projects/lambdaconf_2025/rib_doc.png)
 
-Pattern match works for almost all wasm types such as literals, record, result, option, variants, enums etc
+https://learn.golem.cloud/rib covers most of it
+
+ * grammer
+ * types
+ * if-else
+ * pattern match
+ * list comprehension/reduction
+ * ranges and many more
 
 
 ---
 ## Examples
 
-```rust
-let result = foo("bar);
+![inline](/Users/afsalthaj/projects/lambdaconf_2025/pattern_match_exhaustive.png)
 
-match result {
-   ok(result) => "found ${result.user-id}",
-   err(msg)   =>   msg
-  
-}
+---
 
-```
+## Examples (cont)
 
 
 ```rust
-let worker-name = 
+let worker = 
   if result.user-id > 1000 then "group0" else "group1"
 
 ```
@@ -336,12 +344,23 @@ let worker-name =
 ## Examples (cont)
 
 
+```rust
+let limits = 1..10;
 
+for i in limits {
+  cart.add-items(i);
+  yield "success";
+} 
+
+
+```
 
 ---
+
+
 ## Configuration management in Rib
 
-A typical rib script has the concept of global input.
+Rib has the concept of global input.
 
 
 ```rust
@@ -351,14 +370,16 @@ let token: string = token;
 ```
 
 
-Here rib compiler infers _**token**_ is a global input.
+Here rib compiler infers _**token**_ as a global input. 
+
+In other words, it expects a configuration `token` as input
 
 Rib infers the type of configuration to be of type   _**string**_ 
 
 
 ---
 
-### Configuration management in Rib
+### Configuration Management in Rib
 
 
 
@@ -369,9 +390,9 @@ let token: string = env.token;
 ```
 
 
-Here rib compiler infers _**env**_ is a global input.
+Here rib compiler infers _**env**_ as a global input.
 
-Rib infers the type of configuration to be wasm type _**{env: string}**_
+Rib infers the type of configuration to be wasm record of type _**{ env: string }**_
 
 ---
 
@@ -431,12 +452,12 @@ worker.add-user(user)
 
 ---
 
-API gateway compiles Rib with valid global variables to be `["request"]`.
+### Generating OpenAPI  based on Rib script
 
-Hence it knows statically the http request body, the path variables in the request route,
-And therefore easily generate an open API spec.
-
-And any http calls that don't satisfy these requirements will become a BadRequest
+* API gateway compiles Rib with valid global variables to be `["request"]`.
+* Hence it knows statically the http request body, the path variables in the request route,
+* Easily generate an open API spec.
+* And any http calls that don't satisfy these requirements will become a BadRequest
 
 ---
 ## Rib Implementation overview
@@ -446,16 +467,6 @@ And any http calls that don't satisfy these requirements will become a BadReques
 * Rib compiler consist of independent 15+ compilation phases
 * Examples: `type_pull_up`,  `type_push_down_phase`, `type_check` and `unification`
 * It scans script repeatedly for some of these phases, until it reaches a fix-point of inference defined by the sate of `InferredType` which is a superset of wasm types.
-
----
-
-## Rib Implementation overview (contd)
-
-* Rib Intermediate Representation (IR): 
-   **https://github.com/golemcloud/golem/blob/main/golem-rib/src/compiler/ir.rs**
-* Stack based interpreter
-* Configurable compiler and interpreter to customize the behaviour
-   * Example customizations are golem API gateway, Rib REPL
 
 ---
 
@@ -471,21 +482,28 @@ where
   ...
 }
 ```
----
-## Rib IR
-
-
 
 ---
 
-### Immedediate things to improve
+## Rib Implementation overview (contd)
+
+* Rib Intermediate Representation (IR): 
+   **https://github.com/golemcloud/golem/blob/main/golem-rib/src/compiler/ir.rs**
+* Stack based interpreter
+* Configurable compiler and interpreter to customize the behaviour
+   * Example customizations are golem API gateway, Rib REPL
+
+
+---
+
+## Immediate things to fix and improve
+
 
 * Precise and better compilation errors, at the unification phase
 * std functions and user defined functions
-* Possibly
+And resolve known issues [here](https://github.com/golemcloud/golem/issues?q=is%3Aissue%20state%3Aopen%20author%3Aafsalthaj%20label%3Arib)
 
 ---
-
 
 
 ## A note on precise compilation errors
@@ -497,21 +515,21 @@ where
 
 ---
 
-
-
----
-## Quick summary of Rib interactions
-
-* API gateway in golem - embedded rib scripts are significantly used in golem-timeline
-* golem REPL and wasmtime REPL (forked)
-
----
-
 ## How Rib is used in golem-timeline ?
 
 * Get the current state of computation from every components involved in a streaming pipeline, and do various dynamic operations. 
 * We cannot afford writing a component for each of those numerous dynamic requirements
-* We need a reliable, light-weight yet type safe way of interacting with it
+* Easily create an observability tool for timeline
+
+---
+
+## Find more details at
+
+https://learn.golem.cloud/rib
+
+https://github.com/golemcloud/golem/tree/main/golem-rib
+
+https://github.com/golemcloud/golem/tree/main/golem-rib-repl
 
 ---
 
