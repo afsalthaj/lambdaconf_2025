@@ -35,7 +35,7 @@ WASMTIME dependency: https://github.com/afsalthaj/wasmtime
 ```
 
 
-Presentation:
+## Presentation:
 
 
 
@@ -112,28 +112,28 @@ As of now dev release required to invoke functions in a component
 
 ## Steps to follow
 
-* We will build a **simple component** and it's called `command` component so that we can use wasmtime CLI to interact
-* Build a **command** component - to which `wasmtime` cli will interact with!
-* Import the arithmetic package in command component and re-export them
-* use **wasmtime cli** to just interact with it by invoking functions
+* We will build a **simple component** and it's called `command` component
+* We will walk through a simple **WIT** file that's part of the component
+* A quick skim through the component code written in rust
+* Try running the component using **wasmtime** and try invoking functions
 
 ---
 
-### Demo: Wasmtime cli direct component function invoke
+## Let' see this in action
 
 ---
 
 ## Suboptimal interaction
 
-* Gets vary for complex types
-* Limited: How about passing the result of one component to the other?
-* Basic requirement - invoking a function, and looks far different from what developers already know
+* Gets difficult with complex types
+* Limited interaction capability. Example: How about passing the result of one component to the other?
+* Prone to making errors, less productivity
+
 
 ---
-
 ## Solution
 
-Wasmtime Repl backed by the typesafe scripting language Rib
+###A [**REPL**](https://github.com/afsalthaj/wasmtime) within wasmtime backed by the type-safe **Rib** language
 
 ---
 
@@ -146,22 +146,39 @@ Wasmtime Repl backed by the typesafe scripting language Rib
 ![inline 85%](/Users/afsalthaj/projects/lambdaconf_2025/rib_repl_initial.png)
 
 ---
+## Rib REPL in wasmtime - parser errors
 
-## Rib REPL in wasmtime - compiler errors
 
-![inline 90%](/Users/afsalthaj/projects/lambdaconf_2025/rib_repl_initial.png)
+![inline](/Users/afsalthaj/projects/lambdaconf_2025/repl_parser_error.png)
+
 
 ---
 
 
+## Rib REPL in wasmtime - compiler errors
+
+![inline](/Users/afsalthaj/projects/lambdaconf_2025/repl_compilation_error.png)
+
+
+---
+
+
+## The errors without REPL
+
+![inline](/Users/afsalthaj/projects/lambdaconf_2025/wasmtime_compilation_error.png)
+
+
+---
+
 ## What we achieved?
 
-![left filtered 50%](/Users/afsalthaj/projects/ribbb/lambdaconf_2025/rib_image.jpeg)
+![filtered](/Users/afsalthaj/projects/ribbb/lambdaconf_2025/rib_image.jpeg)
 
-* Quick _**typesafe**_ interaction with WASM, helps with complex types
+* Quick _**typesafe**_ interactions with WASM components
 * _**Method call syntax**_ to invoke functions
-* _**Autocomplete**_ all the way including function arguments
-* Type inspection
+* _**Autocomplete**_ all the way - function name, variants, enums and  function arguments
+* **Inspect types** anytime
+* Distinguish components, functions etc properly
 * Descriptive _**compilation errors**_
 
 ---
@@ -176,50 +193,55 @@ It's easy to use, and syntax is intuitive
 
 ---
 
-## Rib Repl - Consistent syntax
+## Consistent Method Call Syntax
+
+
 
 ```rust
+// x is a component instance, cart is a resource instance
 >>> let x = instance();
 >>> let cart = x.cart(user-id);
-cart.add-item({product-id: 1, product-name: apple, quantity: 1, price: 1000})
+>>> cart.add-item({product-id: 1, product-name: apple, quantity: 1, price: 1000})
 ```
 
 ---
-## Rib Repl - Distinguish components with type parameters
-
-If you have multiple components in the context, we can distinguish them with component 
-root package as a type parameter
+## Distinguish components with type parameters
 
 
 ```rust
 
 >>> let x = instance[foo:bar]()
->>> let y = instanec[bar:baz]()
+>>> let y = instance[bar:baz]()
 >>> x.foo()
 >>> y.bar()
 
 ```
----
 
 ---
-## Rib Repl - Distinguish functions within a component
+## Rib REPL - Distinguish functions within a component
 
-If you have multiple components in the context, we can distinguish them with component 
-root package as a type parameter
 
+_**baz**_ and _**qux**_ are interfaces having function _**bar**_
 
 ```rust
 
 >>> let x = instance()
->>> y.bar[baz]()
+>>> x.bar[baz]()
+>>> x.bar[qux]()
 
 ```
 
----
-## Is Rib REPL tied to wasmtime?
 
-No! It's an embeddable REPL that you can integrate with any system that knows how load components
-and how to invoke functions
+---
+
+## Embeddable 
+
+Is **Rib REPL** tied to `wasmtime`?
+
+No! `Rib REPL` is an embeddable REPL that you can integrate with any system/runtime clients.
+
+We will see an example of it outside wasmtime
+
 
 ![right fit](/Users/afsalthaj/projects/lambdaconf_2025/repl_embedded.png)
 
